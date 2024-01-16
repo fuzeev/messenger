@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="text-center">Простой Чат</h2>
+            <div id="chatBox" class="border rounded p-3" style="height: 300px; overflow-y: scroll;">
+                <!-- Сообщения будут отображаться здесь -->
+            </div>
+            <input type="text" id="userIdInput" class="form-control mt-3" placeholder="Ваш ID пользователя">
+            <textarea id="messageInput" class="form-control mt-3" placeholder="Напишите сообщение"></textarea>
+            <button id="sendButton" class="btn btn-primary mt-3">Отправить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Подключение Bootstrap JS и зависимостей -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- WebSocket и обработчики событий -->
+<script>
+    var ws = new WebSocket('ws://localhost:8000/ws');
+
+    ws.onmessage = function(event) {
+        var message = JSON.parse(event.data);
+        document.getElementById('chatBox').innerHTML += '<p><b>User ' + message.UserID + ':</b> ' + message.Content + '</p>';
+    };
+
+    document.getElementById('sendButton').onclick = function() {
+        var userId = document.getElementById('userIdInput').value;
+        var message = document.getElementById('messageInput').value;
+
+        var userIdInt = parseInt(userId, 10);
+        if (isNaN(userIdInt)) {
+            alert('UserID должен быть числом');
+            return;
+        }
+
+        ws.send(JSON.stringify({ UserID: userIdInt, Content: message, Time: new Date() }));
+        document.getElementById('messageInput').value = '';
+    };
+</script>
+</body>
+</html>
